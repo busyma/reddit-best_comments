@@ -41,14 +41,14 @@ def main(in_directory, out_directory):
     avg_scores = comments.groupBy('subreddit').avg('score').withColumnRenamed('avg(score)', 'avg_score')
     avg_scores = avg_scores.filter(avg_scores.avg_score >= 0)
   
-    join_avg_score = comments.join(avg_scores.hint('broadcast'), on ='subreddit')
+    join_avg_score = comments.join(avg_scores, on ='subreddit')
 
     
     rel_score = join_avg_score.withColumn('rel_score', join_avg_score.score/join_avg_score.avg_score ).cache()
 
     max_rel_score = rel_score.groupBy('subreddit').max('rel_score').withColumnRenamed('max(rel_score)', 'max_rel_score')
 
-    joined_max = rel_score.join(max_rel_score.hint('broadcast'), on ='subreddit')
+ #.hint('broadcast')
 
     filtered_scores= joined_max.filter(joined_max.rel_score == joined_max.max_rel_score).sort('subreddit')
 
